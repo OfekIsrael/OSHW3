@@ -9,7 +9,7 @@ Queue* createQueue(int capacity) {
         return NULL;
     }
 
-    Queue* q = (Queue*)malloc(sizeof(Queue) + (capacity + 1) * sizeof(int));
+    Queue* q = (Queue*)malloc(sizeof(Queue) + (capacity + 1) * sizeof(Request));
     if (!q) {
         return NULL;
     }
@@ -22,17 +22,9 @@ Queue* createQueue(int capacity) {
         free(q);
         return NULL;
     }
-    if (pthread_cond_init(&(q->emptyCond), NULL) != 0) {
-        pthread_mutex_destroy(&(q->lock));
-        free(q);
-        return NULL;
-    }
-    if (pthread_cond_init(&(q->fullCond), NULL) != 0) {
-        pthread_mutex_destroy(&(q->lock));
-        pthread_cond_destroy(&(q->emptyCond));
-        free(q);
-        return NULL;
-    }
+
+    pthread_cond_init(&(q->emptyCond), NULL);
+    pthread_cond_init(&(q->fullCond), NULL);
 
     return q;
 }
@@ -46,18 +38,7 @@ void destroyQueue(Queue* q) {
     }
 }
 
-int isEmptyQueue(Queue *q) {
-
-    if (!q) return 1;
-
-    pthread_mutex_lock(&(q->lock));
-    int empty = (q->front == q->rear);
-    pthread_mutex_unlock(&(q->lock));
-
-    return empty;
-}
-
-void enqueueQueue(Queue* q, int data) {
+void enqueueQueue(Queue* q, Request* data) {
 
     if(!q) return;
 
@@ -74,9 +55,9 @@ void enqueueQueue(Queue* q, int data) {
     pthread_mutex_unlock(&(q->lock));
 }
 
-int dequeueQueue(Queue* q) {
+Request* dequeueQueue(Queue* q) {
 
-    if(!q) return -1;
+    if(!q) return NULL;
 
     pthread_mutex_lock(&(q->lock));
 
@@ -84,23 +65,10 @@ int dequeueQueue(Queue* q) {
         pthread_cond_wait(&(q->emptyCond), &(q->lock));
     }
 
-    int data = q->arr[q->front];
+    Request* data = q->arr[q->front];
     q->front = (q->front + 1) % q->capacity;
 
     pthread_cond_signal(&(q->fullCond));
-    pthread_mutex_unlock(&(q->lock));
-
-    return data;
-}
-
-int queueHead(Queue* q) {
-
-    if(!q) return -1;
-
-    pthread_mutex_lock(&(q->lock));
-
-    int data = (q->front != q->rear) ? q->arr[q->front] : -1;
-
     pthread_mutex_unlock(&(q->lock));
 
     return data;

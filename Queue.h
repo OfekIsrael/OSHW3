@@ -4,24 +4,25 @@
 #include <pthread.h>
 
 typedef struct {
+    int connfd;
+    struct timeval arrival;
+} Request;
+
+typedef struct {
     int front;
     int rear;
     int capacity;
     pthread_mutex_t lock;
     pthread_cond_t emptyCond, fullCond;
-    int arr[];
+    Request* arr[];
 } Queue;
 
 Queue* createQueue(int capacity);
 
 void destroyQueue(Queue* q);
 
-int isEmptyQueue(Queue *q);
+void enqueueQueue(Queue* q, Request* data);
 
-void enqueueQueue(Queue* q, int data);
-
-int dequeueQueue(Queue* q);
-
-int queueHead(Queue* q);
+Request* dequeueQueue(Queue* q);
 
 #endif
