@@ -43,6 +43,8 @@ void* workerThread(void* arg) {
 
         requestHandle(req->connfd, req->arrival, dispatch, t, log1);
 
+        requestComplete(requestQueue);
+
         Close(req->connfd); // Close the connection
         free(req);
     }

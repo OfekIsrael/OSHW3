@@ -14,6 +14,7 @@ typedef struct {
     int capacity;
     pthread_mutex_t lock;
     pthread_cond_t emptyCond, fullCond;
+    int requestsProcessing, size;
     Request* arr[];
 } Queue;
 
@@ -24,5 +25,7 @@ void destroyQueue(Queue* q);
 void enqueueQueue(Queue* q, Request* data);
 
 Request* dequeueQueue(Queue* q);
+
+void requestComplete(Queue* q);
 
 #endif
