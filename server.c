@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 Queue* requestQueue;
-server_log log1;
+server_log log;
 
 // Parses command-line arguments
 void getargs(int *port, int *numThreads, int *queueSize, int argc, char *argv[])
@@ -41,7 +41,7 @@ void* workerThread(void* arg) {
 
         t->total_req++;
 
-        requestHandle(req->connfd, req->arrival, dispatch, t, log1);
+        requestHandle(req->connfd, req->arrival, dispatch, t, log);
 
         Close(req->connfd); // Close the connection
         free(req);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 {
     printf("OS-HW3 Web Server\n");
     // Create the global server log
-    log1 = create_log();
+    log = create_log();
 
     int listenfd, connfd, port, clientlen, numThreads, queueSize;
     struct sockaddr_in clientaddr;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
 
     // Clean up the server log before exiting
-    destroy_log(log1);
+    destroy_log(log);
 
     // TODO: HW3 — Add cleanup code for thread pool and queue
 }

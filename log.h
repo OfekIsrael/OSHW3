@@ -1,6 +1,8 @@
 #ifndef SERVER_LOG_H
 #define SERVER_LOG_H
 
+#include "segel.h"
+
 // TODO:
 // Implement a thread-safe server log system.
 // - The log should support concurrent access from multiple threads.
@@ -24,5 +26,13 @@ int get_log(server_log log, char** dst);
 
 // Appends a new entry to the log
 void add_to_log(server_log log, const char* data, int data_len);
+
+void reader_lock(server_log log);
+
+void reader_unlock(server_log log);
+
+void writer_lock(server_log log);
+
+void writer_unlock(server_log log);
 
 #endif // SERVER_LOG_H
