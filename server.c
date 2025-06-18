@@ -23,7 +23,7 @@ void* workerThread(void* arg) {
     int id = *(int*)arg;
 
     threads_stats t = malloc(sizeof(struct Threads_stats));
-    t->id = id;
+    t->id = id + 1;
     t->stat_req = 0;       // Static request count
     t->dynm_req = 0;       // Dynamic request count
     t->total_req = 0;      // Total request count
@@ -42,6 +42,8 @@ void* workerThread(void* arg) {
         t->total_req++;
 
         requestHandle(req->connfd, req->arrival, dispatch, t, logs);
+
+        requestComplete(requestQueue);
 
         Close(req->connfd); // Close the connection
         free(req);
