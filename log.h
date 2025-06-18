@@ -15,7 +15,6 @@
 
 typedef struct Server_Log {
     LinkedList* log;
-    int log_size;
 
     int readers_inside, writers_inside, writers_waiting;
     pthread_cond_t read_allowed;

@@ -7,7 +7,6 @@
 server_log create_log() {
     server_log serLog = malloc(sizeof(struct Server_Log));
     serLog->log = create_list();
-    serLog->log_size = 0;
     serLog->readers_inside = 0;
     serLog->writers_inside = 0;
     serLog->writers_waiting = 0;
@@ -30,18 +29,17 @@ void destroy_log(server_log log) {
 
 int get_log(server_log log, char** dst) {
     reader_lock(log);
-    dst = malloc(log->log_size * sizeof(char*));
-    char**temp = dst;
     int len = 0;
-    Node *current = log->log->head;
-    while (current) {
-        const char* line = current->data;
-        len += strlen(line);
-        *temp = (char*)malloc(len + 1); // Allocate for caller
-        if (*temp != NULL) {
-            strcpy(*temp, line);
-        }
-        temp++;
+    Node* current = log->log->head;
+    while (current != NULL) {
+        len += strlen(current->data);
+        current = current->next;
+    }
+    *dst = malloc(len + log->log->size + 1);
+    char *pos = *dst;
+    current = log->log->head;
+    while (current != NULL) {
+        pos += sprintf(pos, "%s\n", current->data);
         current = current->next;
     }
     reader_unlock(log);
@@ -52,7 +50,6 @@ int get_log(server_log log, char** dst) {
 void add_to_log(server_log log, const char* data, int data_len) {
     writer_lock(log);
     insert_back(log->log, data, data_len);
-    log->log_size++;
     writer_unlock(log);
 }
 
