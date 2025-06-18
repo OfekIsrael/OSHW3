@@ -1,6 +1,9 @@
 #ifndef SERVER_LOG_H
 #define SERVER_LOG_H
 
+#include "segel.h"
+#include "LinkedList.h"
+
 // TODO:
 // Implement a thread-safe server log system.
 // - The log should support concurrent access from multiple threads.
@@ -10,7 +13,14 @@
 // - Use appropriate synchronization primitives (e.g., pthread mutexes and condition variables).
 // - The log should allow appending entries and returning the full log content.
 
-typedef struct Server_Log* server_log;
+typedef struct Server_Log {
+    LinkedList* log;
+
+    int readers_inside, writers_inside, writers_waiting;
+    pthread_cond_t read_allowed;
+    pthread_cond_t write_allowed;
+    pthread_mutex_t log_lock;
+}*server_log;
 
 // Creates a new server log instance
 server_log create_log();
@@ -24,5 +34,13 @@ int get_log(server_log log, char** dst);
 
 // Appends a new entry to the log
 void add_to_log(server_log log, const char* data, int data_len);
+
+void reader_lock(server_log log);
+
+void reader_unlock(server_log log);
+
+void writer_lock(server_log log);
+
+void writer_unlock(server_log log);
 
 #endif // SERVER_LOG_H
