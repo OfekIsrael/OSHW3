@@ -22,12 +22,12 @@ int insert_back(LinkedList *list, const char *str, int strLen) {
     }
     strcpy(node->data, str);
     node->next = NULL;
-
     if (!list->head && !list->back) {
         list->head = node;
         list->back = node;
     }else {
-        list->back->next=node;
+        list->back->next = node;
+        list->back = list->back->next;
     }
     list->size++;
     return 1;
