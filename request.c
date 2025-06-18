@@ -1,8 +1,3 @@
-//
-// request.c: Does the bulk of the work for the web server.
-// 
-
-#include "segel.h"
 #include "request.h"
 
 int append_stats(char* buf, threads_stats t_stats, struct timeval arrival, struct timeval dispatch){
@@ -193,7 +188,7 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
     // TODO:  should update static request stats
     int is_static;
     struct stat sbuf;
-    char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
+    char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE], data[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
     rio_t rio;
 
@@ -234,8 +229,9 @@ void requestHandle(int fd, struct timeval arrival, struct timeval dispatch, thre
             t_stats->dynm_req++;
             requestServeDynamic(fd, filename, cgiargs, arrival, dispatch, t_stats);
         }
-
-        // TODO: add log entry using add_to_log(server_log log, const char* data, int data_len);
+    	memset(data, 0, sizeof(data));
+		int data_len = append_stats(data, t_stats, arrival, dispatch);
+    	add_to_log(log, data, data_len);
 
     } else if (!strcasecmp(method, "POST")) {
         t_stats->post_req++;
