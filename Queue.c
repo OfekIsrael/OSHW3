@@ -46,16 +46,13 @@ void enqueueQueue(Queue* q, Request* data) {
 
     pthread_mutex_lock(&(q->lock));
 
-    while(q->size + q->requestsProcessing >= q->capacity) {
-        pthread_cond_wait(&(q->fullCond), &(q->lock));
-    }
-
     q->arr[q->rear] = data;
     q->rear = (q->rear + 1) % q->capacity;
     q->size++;
 
     pthread_cond_signal(&(q->emptyCond));
     pthread_mutex_unlock(&(q->lock));
+
 }
 
 Request* dequeueQueue(Queue* q) {

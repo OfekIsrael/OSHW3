@@ -33,8 +33,6 @@ void* workerThread(void* arg) {
 
         Request* req = dequeueQueue(requestQueue);
 
-        printf("Thread %d dequeued request fd %d\n", id, req->connfd);
-
         struct timeval dispatch, current;
         gettimeofday(&current, NULL);
         timersub(&current, &(req->arrival), &dispatch);
@@ -82,7 +80,16 @@ int main(int argc, char *argv[])
 
     listenfd = Open_listenfd(port);
     while (1) {
+
+        pthread_mutex_lock(&(requestQueue->lock));
+
+        while(requestQueue->size + requestQueue->requestsProcessing >= requestQueue->capacity) {
+            pthread_cond_wait(&(requestQueue->fullCond), &(requestQueue->lock));
+        }
+
         clientlen = sizeof(clientaddr);
+
+        pthread_mutex_unlock(&(requestQueue->lock));
         connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *) &clientlen);
 
         struct timeval arrival;
